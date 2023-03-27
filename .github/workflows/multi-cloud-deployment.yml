@@ -1,0 +1,175 @@
+
+name: "🚀 Multi-cloud deployment"
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+
+  # This job is about checking that the workflow has been triggered by a repo admin on a release tag (v*)
+  # If not, the workflow will fail.
+  prereq_checks:
+    name: Ensure this workflow has been trigger on a protected release tag (v*)
+    runs-on: ubuntu-latest
+    env:
+      TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+    steps:
+      - name: Fail if the workflow has been triggered manually with a non-release tag (i.e. not using the 'v*' regex)
+        run: |
+          if [[ "$GITHUB_REF" != refs/tags/v* ]]; then
+            echo "Only 'v*' tags and associated releases can be deployed, exiting."
+            exit 1
+          fi
+      - name: Ensure the triggering actor has admin permissions on the repository
+        id: check_admin
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const TRIGGERING_ACTOR = process.env.TRIGGERING_ACTOR
+            github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: TRIGGERING_ACTOR
+              }).then(response => {
+                if (response.data.permission == 'admin') {
+                  core.info('The github actor has admin permission on this repository')
+                } else {
+                  core.info('The github actor does not have admin permission on this repository')
+                  process.exit(1)
+                }
+              })
+          
+  # This job is about building and testing the application.
+  # The resulting JAR file is then saved as an artifact for the next job.
+  build:
+    permissions:
+      contents: read
+    needs: [ prereq_checks ]
+    name: "🚧 - Build & Test"
+    runs-on: ubuntu-latest  
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: 'maven'
+
+      - name: Build with Maven Wrapper
+        run: ./mvnw -B package
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: spring-petclinic.jar
+          path: target/spring-petclinic-*.jar
+
+  # This job is about building and publishing the container image to GitHub Container Registry (GHCR).
+  build_publish_container:
+    permissions:
+      contents: read
+      packages: write
+    name: "🐳 - Push container image to GitHub Packages"
+    needs: [ build ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Jar file artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: spring-petclinic.jar
+          path: target
+
+      - name: GitHub Container Registry Login
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Container
+        id: container_publish
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args: |
+            VERSION=${{ github.ref_name }}
+            REPOSITORY_NAME=${{ github.repository }}
+            revision=${{ github.sha }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+
+  # The three next jobs are using reusable workflows to deploy the application to the different cloud providers.
+  # The reusable workflows are located in the .github/workflows/reusable_workflows folder.
+  #
+  # Deploy the container image to Azure ACI
+  deploy-to-azure-aci-prod:
+    permissions:
+      id-token: write
+      contents: read
+    name: Azure ACI production deployment
+    uses: ./.github/workflows/reusable_workflows/deploy-to-azure-aci.yml
+    needs: [ build_publish_container ]
+    with:
+      environment: azure
+      container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+      resource-group: rg-spring-petclinic   # must match the resource group created in ../../docs/infra-setup/azure.md
+      deployment-name: ghsioux-spring-petclinic
+      deployment-url-prefix: ghsioux-spring-petclinic
+      location: "east us"   # must match the Azure region used in ../../docs/infra-setup/azure.md
+      ports: 8080
+    secrets:
+      az_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+      az_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+      az_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} 
+
+  # Deploy the container image to AWS ECS
+  deploy-to-aws-ecs:
+    permissions:
+      id-token: write
+      contents: read
+    name: AWS ECS production deployment
+    uses: ./.github/workflows/reusable_workflows/deploy-to-aws-ecs.yml
+    needs: [ build_publish_container ]
+    with:
+      environment: aws
+      container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+      ecs-cluster: demo-ecs-cluster   # must match the ECS cluster created in ../../docs/infra-setup/aws.md
+      ecs-service: spring-petclinic   # must match the ECS service created in ../../docs/infra-setup/aws.md
+      ecs-task-definition: ./assets/aws-petclinic-ecs-task-definition.json # must match the ECS task definition used in ../../docs/infra-setup/aws.md
+      container-name: petclinic-container # must match the container name defined in the aws-petclinic-ecs-task-definition.json
+      aws-region: ap-southeast-1 # must match the AWS region used in ../../docs/infra-setup/aws.md
+    secrets:
+      oidc-role-to-assume: ${{ secrets.OIDC_ROLE_TO_ASSUME }}
+
+  # Deploy the container image to GCP Cloud Run
+  # One specificity of this deployment is that the container image is pushed to Google Artifact Registry (GAR) 
+  # before being deployed to Cloud Run. This is because GHCR is not supported by Cloud Run yet.
+  deploy-to-gcp-cloudrun:
+    permissions:
+      id-token: write
+      contents: read
+    name: GCP Cloud Run deployment
+    uses: ./.github/workflows/reusable_workflows/deploy-to-gcp-cloudrun.yml
+    needs: [ build_publish_container ]
+    with:
+      environment: gcp
+      container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+      cloudrun-service: spring-petclinic  # must match the Cloud Run service mentioned in ../../docs/oidc-setup/gcp.md
+      push-to-gar: true
+      gar-target-image: europe-west1-docker.pkg.dev/github-380013/spring-petclinic/${{ github.repository }}:${{ github.ref_name }}  # must match the used GCP region and created Artifact registry in  ../../docs/infra-setup/gcp.md
+      region: europe-west1  # must match the GCP region used in ../../docs/infra-setup/gcp.md
+      flags: --port=8080 --platform=managed --allow-unauthenticated
+    secrets:
+      workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+      service_account: ${{ secrets.SERVICE_ACCOUNT }}
