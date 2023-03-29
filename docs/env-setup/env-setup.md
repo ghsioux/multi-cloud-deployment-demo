@@ -55,6 +55,6 @@ export GCP_ARTIFACT_REGISTRY="spring-petclinic-gar"
 export GCP_SERVICE_ACCOUNT="github-actions-petclinic-sa"
 export GCP_WORKLOAD_IDENTITY_POOL="gh-petclinic-pool"
 export GCP_WORKLOAD_IDENTITY_PROVIDER="gh-petclinic-provider"
-export GCP_OIDC_IDENTITY="repo:ghsioux/multi-cloud-deployment-demo:environment:azure"
+export GCP_OIDC_IDENTITY="repo:ghsioux/multi-cloud-deployment-demo:environment:gcp"
 ```
 
