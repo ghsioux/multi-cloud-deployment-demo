@@ -118,7 +118,7 @@ jobs:
       id-token: write
       contents: read
     name: Azure ACI production deployment
-    uses: ./.github/workflows/reusable_workflows/deploy-to-azure-aci.yml
+    uses: ./.github/workflows/deploy-to-azure-aci.yml
     needs: [ build_publish_container ]
     with:
       environment: azure
@@ -139,7 +139,7 @@ jobs:
       id-token: write
       contents: read
     name: AWS ECS production deployment
-    uses: ./.github/workflows/reusable_workflows/deploy-to-aws-ecs.yml
+    uses: ./.github/workflows/deploy-to-aws-ecs.yml
     needs: [ build_publish_container ]
     with:
       environment: aws
@@ -160,7 +160,7 @@ jobs:
       id-token: write
       contents: read
     name: GCP Cloud Run deployment
-    uses: ./.github/workflows/reusable_workflows/deploy-to-gcp-cloudrun.yml
+    uses: ./.github/workflows/deploy-to-gcp-cloudrun.yml
     needs: [ build_publish_container ]
     with:
       environment: gcp
