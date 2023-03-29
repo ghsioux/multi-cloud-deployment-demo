@@ -141,6 +141,6 @@ Alternatively, you can use the GitHub CLI to create the secret:
 # exist in your Codespace.
 
 # set the secret to the aws environment using the gh cli
-$ gh secret set --env gcp WORKLOAD_IDENTITY_PROVIDER --body "WORKLOAD_IDENTITY_PROVIDER_LOCATION"
+$ gh secret set --env gcp WORKLOAD_IDENTITY_PROVIDER --body "$WORKLOAD_IDENTITY_PROVIDER_LOCATION"
 $ gh secret set --env gcp SERVICE_ACCOUNT --body "$SERVICE_ACCOUNT_ID"
 ```
