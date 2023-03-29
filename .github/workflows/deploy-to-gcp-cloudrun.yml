@@ -63,7 +63,7 @@ jobs:
         if: inputs.push-to-gar == true
         uses: docker/login-action@v2
         with:
-          registry: us-central1-docker.pkg.dev
+          registry: ${{ inputs.region }}-docker.pkg.dev
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
 
