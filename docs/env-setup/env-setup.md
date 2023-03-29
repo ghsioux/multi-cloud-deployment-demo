@@ -22,12 +22,13 @@ For Azure:
 For GCP:
 | Environment Variable | Description |
 | --- | --- | 
-| GCP_PROJECT_ID | GCP project ID |
-| GCP_REGION | GCP region |
-| GCP_ARTIFACT_REGISTRY | GCP region |
-| GCP_SERVICE_ACCOUNT | GCP service account name |
-| GCP_WORKLOAD_IDENTITY_POOL | GCP workload identity pool name |
-| GCP_WORKLOAD_IDENTITY_PROVIDER | GCP workload identity provider name |
+| GCP_PROJECT_ID | The project ID of the GCP project we'll create |
+| GCP_REGION | The GCP region where we'll deploy the container app |
+| GCP_ARTIFACT_REGISTRY | The name of the Google Artifact Registry that we'll create |
+| GCP_SERVICE_ACCOUNT | The name of the GCP service account that we'll create |
+| GCP_WORKLOAD_IDENTITY_POOL | The name of the GCP workload identity pool that we'll create |
+| GCP_WORKLOAD_IDENTITY_PROVIDER | The name of the GCP workload identity provider that we'll create |
+| GCP_OIDC_IDENTITY | The OIDC identity that we'll use to authenticate to Google Cloud (see [GitHub documentation](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#configuring-the-oidc-trust-with-the-cloud)) for more information  |
 
 Below is the environment file - named `env.sh` - we'll use for the demo setup, feel free to adapt the values to your needs:
 
