@@ -39,12 +39,12 @@ See more information regarding environments [here](https://docs.github.com/en/ac
 
 ## Environment file setup
 
-See [Environment setup](env-setup/env-setup.md).
+See [Environment setup](./docs/env-setup/env-setup.md).
 
 ## Cloud infrastructure setup
 
-See [Cloud infrastructure setup](infra-setup/).
+See [Cloud infrastructure setup](./docs/infra-setup/).
 
 ## OIDC setup
 
-See [OIDC setup](oidc-setup/).
+See [OIDC setup](.docs/oidc-setup/).
