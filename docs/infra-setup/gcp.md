@@ -6,11 +6,9 @@ First, be sure to source the `env.sh` file created during the [environment setup
 $ source env.sh
 ```
 
-You can adapt these values depending on your needs.
-
 ## GCP CLI setup
 
-First login to GCP using the following command:
+Login to GCP using the following command:
 
 ```bash
 $ gcloud auth login --brief
@@ -23,6 +21,10 @@ $ gcloud projects create $GCP_PROJECT_ID
 # Work in the newly created project
 $ gcloud config set project $GCP_PROJECT_ID
 ```
+
+## Set a billing account for the project
+
+This is a manual step that you need to do in the GCP console. You can find more information [here](https://cloud.google.com/billing/docs/how-to/modify-project).
 
 ## Enable the required services
 
@@ -41,7 +43,7 @@ $ gcloud services enable artifactregistry.googleapis.com
 Since Cloud Run does not support GHCR, we need to create a GCP Artifact Registry to store our Docker images:
 
 ```bash
-gcloud artifacts repositories create spring-petclinic \
+gcloud artifacts repositories create $GCP_ARTIFACT_REGISTRY \
     --repository-format=docker \
     --location=$GCP_REGION 
 ```
