@@ -167,7 +167,7 @@ jobs:
       container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
       cloudrun-service: spring-petclinic  # must match the Cloud Run service mentioned in ../../docs/oidc-setup/gcp.md
       push-to-gar: true
-      gar-target-image: europe-west1-docker.pkg.dev/github-380013/spring-petclinic/${{ github.repository }}:${{ github.ref_name }}  # must match the used GCP region and created Artifact registry in  ../../docs/infra-setup/gcp.md
+      gar-target-image: europe-west1-docker.pkg.dev/ghsioux-12345678/spring-petclinic-gar/${{ github.repository }}:${{ github.ref_name }}  # must match the used GCP region and created Artifact registry in  ../../docs/infra-setup/gcp.md
       region: europe-west1  # must match the GCP region used in ../../docs/infra-setup/gcp.md
       flags: --port=8080 --platform=managed --allow-unauthenticated
     secrets:
