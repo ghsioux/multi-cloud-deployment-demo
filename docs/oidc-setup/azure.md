@@ -66,7 +66,7 @@ $ az ad app federated-credential create --id $APPLICATION_ID --parameters @- <<E
   "description": "OIDC configuration for PetClinic deployment in Azure Container Instance",
   "issuer": "https://token.actions.githubusercontent.com",
   "name": "petclinic-oidc",
-  "subject": "$AZURE_OIDC_TOCKEN_SUB"
+  "subject": "$AZURE_OIDC_IDENTITY"
 }
 EOF
 ```
@@ -91,7 +91,7 @@ $ echo $AZURE_TENANT_ID
 $ echo $AZURE_SUBSCRIPTION_ID
 ```
 
-Using the web UI, go to your repository, then to `Settings` > `Environments` > `aws` > `Secrets` and create the three secrets:
+Using the web UI, go to your repository, then to `Settings` > `Environments` > `azure` > `Secrets` and create the three secrets:
 * a secret named `AZURE_CLIENT_ID` with the value of the `AZURE_CLIENT_ID` variable;
 * a secret named `AZURE_TENANT_ID` with the value of the `AZURE_TENANT_ID` variable;
 * a secret named `AZURE_SUBSCRIPTION_ID` with the value of the `AZURE_SUBSCRIPTION_ID` variable.

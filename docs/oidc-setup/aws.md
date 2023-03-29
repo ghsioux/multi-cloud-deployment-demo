@@ -67,7 +67,7 @@ $ cat <<EOF > trust-policy.json
                         "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
                     },
                     "StringLike": {
-                        "token.actions.githubusercontent.com:sub": "$AWS_OIDC_TOCKEN_SUB"
+                        "token.actions.githubusercontent.com:sub": "$AWS_OIDC_IDENTITY"
                     }
                 }
             }
