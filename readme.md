@@ -47,4 +47,4 @@ See [Cloud infrastructure setup](./docs/infra-setup/).
 
 ## OIDC setup
 
-See [OIDC setup](.docs/oidc-setup/).
+See [OIDC setup](./docs/oidc-setup/).
