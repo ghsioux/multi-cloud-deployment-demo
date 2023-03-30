@@ -45,6 +45,8 @@ $ gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
 $ gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
    --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT_ID.iam.gserviceaccount.com" \
    --role="roles/run.developer"
+
+# also required to be able to create a Cloud Run service
 $ gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
    --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT_ID.iam.gserviceaccount.com" \
    --role="roles/storage.admin"
@@ -86,26 +88,9 @@ $ gcloud iam service-accounts add-iam-policy-binding \
    --member="principal://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/subject/$GCP_OIDC_IDENTITY"
 ```
 
-## Allow the Cloud run service to be invoked by all users
-
-This is required to allow the service to be accessible from the outside world (otherwise we would get some 403 errors):
-
-```bash
-# note 1: here "spring-petclinic" is the name of the service that will 
-# be created by the GitHub Actions workflow (see ../../.github/workflows/multi-cloud-deployment.yml)
-#
-# note 2: this command might fail if the service is not yet created 
-# (which is the case if the workflow has not been triggered yet)
-# you might want to run this command after the container app has been deployed
-$ gcloud run services add-iam-policy-binding spring-petclinic \
-   --member="allUsers" \
-   --role="roles/run.invoker" \
-   --region="$GCP_REGION"
-```
-
 ## Prepare the GitHub environment secrets
 
-We'll create two GitHub environment secrets named in the environment `gcp` that will contain the information related to the service principal created above. These secret will be used by the [google-github-actions/auth](https://github.com/google-github-actions/auth) action to authenticate to GCP using OIDC.
+We'll create two GitHub environment secrets in the environment `gcp` that will contain the information related to the service account created above. These secrets will be used by the [GCP login step](.github/workflows/deploy-to-gcp-cloudrun.yml#L63-L69) to authenticate to GCP using OIDC.
 
 Let's first retrieve the values:
 ```bash

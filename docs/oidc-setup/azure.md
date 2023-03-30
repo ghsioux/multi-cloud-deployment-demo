@@ -70,7 +70,7 @@ EOF
 ## Prepare the GitHub environment secrets
 
 
-We'll create three GitHub environment secrets in the environment `azure` that will contain the information related to the service principal created above. These secret will be used by the [Azure login step](../../.github/workflows/deploy-to-azure-aci.yml#L56-L61) to authenticate to Azure using OIDC.
+We'll create three GitHub environment secrets in the environment `azure` that will contain the information related to the service principal created above. These secrets will be used by the [Azure login step](../../.github/workflows/deploy-to-azure-aci.yml#L56-L61) to authenticate to Azure using OIDC.
 
 Let's first retrieve the values:
 ```bash

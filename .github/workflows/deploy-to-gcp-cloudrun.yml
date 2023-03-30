@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@v3
 
       - id: 'auth'
-        name: 'Authenticate to Google Cloud'
+        name: 'Authenticate to Google Cloud using OIDC'
         uses: 'google-github-actions/auth@v1'
         with:
           workload_identity_provider: ${{ secrets.workload_identity_provider }}
