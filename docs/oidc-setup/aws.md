@@ -8,12 +8,12 @@ $ source env.sh
 
 ## AWS CLI setup
 
-We have to configure the AWS CLI with the credentials for the AWS account you want to deploy to. You can do this by running the following command:
+We have to configure the AWS CLI with the credentials of the AWS account you want to deploy to. You can do this by running the following command:
 ```bash
 $ aws configure
 AWS Access Key ID [None]: [your access key id]
 AWS Secret Access Key [None]: [your secret access key]
-Default region name [None]: [leave blank since we'll specify the region in the CLI commands]
+Default region name [None]: [] # leave blank
 Default output format [None]: json
 ```
 
