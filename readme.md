@@ -53,13 +53,13 @@ See [OIDC setup](./docs/oidc-setup/).
 
 ## Before you trigger a first deployment
 
+You should have a look at [how the three reusable workflows are called](.github/workflows/multi-cloud-deployment.yml#L113-L177) and read the various comments to adapte the parameters to your needs.
+
 ## How to trigger
 
-As a repository admin, you can trigger the ["🚀 Multi-cloud deployment demo" workflow](.github/workflows/multi-cloud-deployment.yml)):
+As a repository admin, you can trigger the ["🚀 Multi-cloud deployment demo" workflow](.github/workflows/multi-cloud-deployment.yml):
 * by creating a release with a tag matching the `v*` pattern;
 * manually on a tag matching the `v*` pattern.
-
-```bash
 
 ## After the first successful deployment 
 
