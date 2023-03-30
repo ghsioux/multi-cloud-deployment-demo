@@ -67,8 +67,8 @@ If you get a 403 error when trying to access the Cloud run service, you might wa
 
 ```bash
 #
-# note 1: here "spring-petclinic" is the name of the service that will 
-# be created by the GitHub Actions workflow (see ../../.github/workflows/multi-cloud-deployment.yml)
+# note: here "spring-petclinic" is the name of the service that will 
+# be created by the GitHub Actions workflow (see ../../.github/workflows/multi-cloud-deployment.yml#169)
 #
 $ gcloud run services add-iam-policy-binding spring-petclinic \
    --member="allUsers" \
