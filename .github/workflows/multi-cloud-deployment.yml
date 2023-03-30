@@ -111,7 +111,7 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
 
   # The three next jobs are using reusable workflows to deploy the application to the different cloud providers.
-  # The reusable workflows are located in the .github/workflows/reusable_workflows folder.
+  # The reusable workflows are located in the same folder as this workflow.
   #
   # Deploy the container image to Azure ACI
   deploy-to-azure-aci-prod:
@@ -124,10 +124,10 @@ jobs:
     with:
       environment: azure
       container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-      resource-group: rg-spring-petclinic   # must match the resource group created in ../../docs/infra-setup/azure.md
+      resource-group: rg-spring-petclinic   # must match the resource group defined in ../../docs/env-setup/env-setup.md
       deployment-name: ghsioux-spring-petclinic
       deployment-url-prefix: ghsioux-spring-petclinic
-      location: "east us"   # must match the Azure region used in ../../docs/infra-setup/azure.md
+      location: "east us"   # must match the Azure region defined in ../../docs/env-setup/env-setup.md
       ports: 8080
     secrets:
       az_client_id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -145,11 +145,11 @@ jobs:
     with:
       environment: aws
       container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-      ecs-cluster: demo-ecs-cluster   # must match the ECS cluster created in ../../docs/infra-setup/aws.md
-      ecs-service: spring-petclinic   # must match the ECS service created in ../../docs/infra-setup/aws.md
+      ecs-cluster: demo-ecs-cluster   # must match the ECS cluster defined in ../../docs/env-setup/env-setup.md
+      ecs-service: spring-petclinic   # must match the ECS service defined in ../../docs/env-setup/env-setup.md
       ecs-task-definition: ./assets/aws-petclinic-ecs-task-definition.json # must match the ECS task definition used in ../../docs/infra-setup/aws.md
       container-name: petclinic-container # must match the container name defined in the aws-petclinic-ecs-task-definition.json
-      aws-region: ap-southeast-1 # must match the AWS region used in ../../docs/infra-setup/aws.md
+      aws-region: ap-southeast-1 # must match the AWS region defined in ../../docs/env-setup/env-setup.md
     secrets:
       oidc-role-to-assume: ${{ secrets.OIDC_ROLE_TO_ASSUME }}
 
@@ -166,10 +166,11 @@ jobs:
     with:
       environment: gcp
       container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-      cloudrun-service: spring-petclinic  # must match the Cloud Run service mentioned in ../../docs/oidc-setup/gcp.md
+      cloudrun-service: spring-petclinic  # must match the Cloud Run service defined in ../../docs/env-setup/env-setup.md
       push-to-gar: true
-      gar-target-image: europe-west1-docker.pkg.dev/ghsioux-123456789/spring-petclinic-gar/${{ github.repository }}:${{ github.ref_name }}  # must match the used GCP region and created Artifact registry in  ../../docs/infra-setup/gcp.md
-      region: europe-west1  # must match the GCP region used in ../../docs/infra-setup/gcp.md
+      # adapt the gar-target-image value below with your GCP region, project ID, and the name of the repository in GAR (defined in ../../docs/env-setup/env-setup.md)
+      gar-target-image: europe-west1-docker.pkg.dev/ghsioux-123456789/spring-petclinic-gar/${{ github.repository }}:${{ github.ref_name }}  
+      region: europe-west1  # must match the GCP region defined in ../../docs/env-setup/env-setup.md
       flags: --port=8080 --platform=managed --allow-unauthenticated
     secrets:
       workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}

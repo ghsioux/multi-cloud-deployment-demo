@@ -44,7 +44,7 @@ export AWS_OIDC_IDENTITY="repo:ghsioux/multi-cloud-deployment-demo:environment:a
 
 # Azure
 export AZURE_REGION="eastus"
-export AZURE_RESOURCE_GROUP="rg-demo-multicloud-deployment"
+export AZURE_RESOURCE_GROUP="rg-spring-petclinic"
 export AZURE_SERVICE_PRINCIPAL_NAME="spring-petclinic"
 export AZURE_OIDC_IDENTITY="repo:ghsioux/multi-cloud-deployment-demo:environment:azure"
 
