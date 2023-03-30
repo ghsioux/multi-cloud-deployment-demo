@@ -1,25 +1,27 @@
-# Multi-cloud deployment demo repository
+# Multi-cloud deployment demo repository 🚀
 
-This is the demo repository associated with the blog post "".
+This is the demo repository associated with the blog post "" .
 
-Create your own repository by clicking the `Use this template` button on the top right of this page and follow the quickstart below.
+Create your own repository from this one by clicking the `Use this template` button on the top right of this page, and follow the quickstart below.
+
+> ⚠️ **As explained in the blog post, this is for fun and experiment only, and not for production!**
 
 ## Repository setup
 
 ### Branch protection
 
-In a scenario where multiple developers will collaborate on this repo, it is advised to protect the `main` branch by setting up some branch protection rules. For instance:
+In a scenario where multiple developers would collaborate on this repo, it is advised to protect the `main` branch by setting up some branch protection rules. For instance:
 1. Go to `Settings` > `Branches`;
 2. Click on the `Add Rules` button;
 3. Set `main` (or the name of your main, production branch) as the branch name pattern;
-4. Choose the protection you want (e.g `Require a pull request before merging` with n reviewers). 
+4. Choose the protection you want (e.g `Require a pull request before merging` with ___n___ reviewers). 
 
 See more information regarding branch protection rules [here](https://docs.github.com/en/github/administering-a-repository/defining-the-mergeability-of-pull-requests/about-protected-branches).
 
 
 ### `v*` tag protection
 
-Create a tag protection rule that will protect tags matching the `v*`pattern:
+Create a tag protection rule that will protect the creation of tags matching the `v*` pattern:
 1. Go to `Settings` > `Tags`;
 2. Click on the `Add Rules` button;
 3. Set `v*` as the tag name pattern;
@@ -48,3 +50,30 @@ See [Cloud infrastructure setup](./docs/infra-setup/).
 ## OIDC setup
 
 See [OIDC setup](./docs/oidc-setup/).
+
+## Before you trigger a first deployment
+
+## How to trigger
+
+As a repository admin, you can trigger the ["🚀 Multi-cloud deployment demo" workflow](.github/workflows/multi-cloud-deployment.yml)):
+* by creating a release with a tag matching the `v*` pattern;
+* manually on a tag matching the `v*` pattern.
+
+```bash
+
+## After the first successful deployment 
+
+If you get a 403 error when trying to access the Cloud run service, you might want to allow all users to invoke the service. To do so, run the following command:
+
+```bash
+#
+# note 1: here "spring-petclinic" is the name of the service that will 
+# be created by the GitHub Actions workflow (see ../../.github/workflows/multi-cloud-deployment.yml)
+#
+$ gcloud run services add-iam-policy-binding spring-petclinic \
+   --member="allUsers" \
+   --role="roles/run.invoker" \
+   --region="$GCP_REGION"
+```
+
+Provided you keep the same service name, you won't need to run this command again.
