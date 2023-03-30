@@ -54,10 +54,6 @@ All what remains now is to create the federated credential that will be used by 
 APPLICATION_ID=$(az ad app list --display-name $AZURE_SERVICE_PRINCIPAL_NAME --query [].appId -o tsv)
 
 # Create the federated credential
-#
-# be sure to change the `subject` value to match 
-# the name of your repository and the environment you're deploying to
-#
 $ az ad app federated-credential create --id $APPLICATION_ID --parameters @- <<EOF
 {
   "audiences": [
@@ -74,7 +70,7 @@ EOF
 ## Prepare the GitHub environment secrets
 
 
-We'll create three GitHub environment secrets named in the environment `azure` that will contain the information related to the service principal created above. These secret will be used by the [Azure/login](https://github.com/Azure/login) action to authenticate to Azure using OIDC.
+We'll create three GitHub environment secrets in the environment `azure` that will contain the information related to the service principal created above. These secret will be used by the [Azure/login](../../.github/workflows/deploy-to-azure-aci.yml#L56-L61) action to authenticate to Azure using OIDC.
 
 Let's first retrieve the values:
 ```bash

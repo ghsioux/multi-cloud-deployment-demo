@@ -90,7 +90,7 @@ $ aws iam attach-role-policy --role-name $AWS_IAM_ROLE \
 
 ## Prepare the GitHub environment secrets
 
-We'll create a GitHub environment secret named `OIDC_ROLE_TO_ASSUME` in the environment `aws` that will contain the ARN of the IAM role we just created. This secret will be used by the [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) action to authenticate to AWS using OIDC.
+We'll create a GitHub environment secret named `OIDC_ROLE_TO_ASSUME` in the environment `aws` that will contain the ARN of the IAM role we just created. This secret will be used by the [configure-aws-credentials](../../.github/workflows/deploy-to-aws-ecs.yml#L61-L66) action to authenticate to AWS using OIDC.
 
 Let's first retrieve the role ARN:
 ```bash
