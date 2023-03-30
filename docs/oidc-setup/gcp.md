@@ -90,7 +90,7 @@ $ gcloud iam service-accounts add-iam-policy-binding \
 
 ## Prepare the GitHub environment secrets
 
-We'll create two GitHub environment secrets in the environment `gcp` that will contain the information related to the service account created above. These secrets will be used by the [GCP login step](.github/workflows/deploy-to-gcp-cloudrun.yml#L63-L69) to authenticate to GCP using OIDC.
+We'll create two GitHub environment secrets in the environment `gcp` that will contain the information related to the service account created above. These secrets will be used by the [GCP login step](../../.github/workflows/deploy-to-gcp-cloudrun.yml#L63-L69) to authenticate to GCP using OIDC.
 
 Let's first retrieve the values:
 ```bash
