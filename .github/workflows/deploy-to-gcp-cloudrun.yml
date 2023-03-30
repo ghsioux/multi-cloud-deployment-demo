@@ -1,0 +1,101 @@
+on:
+  workflow_call:
+    inputs:
+      container-image:
+        required: true
+        description: 'The container image to deploy to Google Cloud Run'
+        type: string
+      push-to-gar:
+        required: true
+        description: 'Push the container image to Google Artifact Registry (useful if the original registry where is stored the image is not supported by Cloud Run)'
+        type: boolean
+      gar-target-image:
+        required: false
+        description: 'The target image to push to Google Artifact Registry (include the GAR URL, repository and tag)'
+        type: string
+      region:
+        required: true
+        description: 'The Google Cloud region where to deploy the container'
+        type: string
+      cloudrun-service:
+        required: true
+        description: 'The name of the Cloud Run service that will be created to run the container image'
+        type: string
+      environment:
+        required: true
+        description: 'The GitHub environment used to deploy'
+        type: string
+      flags:
+        required: false
+        description: 'Additional flags to pass to the Cloud Run service'
+        type: string
+    secrets:
+      workload_identity_provider:
+        description: 'The Workload Identity Provider to use for the OIDC authentication'
+        required: true
+      service_account:
+        description: 'The service account to use for the OIDC authentication'
+        required: true
+
+name: Deploy to Google Cloud Run (OIDC authentication)
+jobs:
+
+    init-deployment:
+      runs-on: ubuntu-latest
+      steps:
+      - id: msg
+        name: " 👋  - Starting Deployment to Google Cloud Run"
+        run : |
+          echo -e " 👋  - Starting Deployment to Google Cloud Run"
+          echo -e " \t will deploy ${{ inputs.container-image }} on region ${{ inputs.region }}"
+
+    deploy-container:
+      needs: [ init-deployment ]
+      environment:
+        name: ${{ inputs.environment }}
+        url: ${{ steps.deploy.outputs.url }}
+      runs-on: ubuntu-latest
+      steps:
+
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v3
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud using OIDC'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+          service_account: ${{ secrets.service_account }}
+          token_format: 'access_token'
+
+      - name: "Login to Google Artifact Registry"
+        if: inputs.push-to-gar == true
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.region }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      # Useful for registries that are not supported by Cloud Run
+      # see https://cloud.google.com/run/docs/deploying#images for more information
+      - name: "Push image from the external registry to the Google Artifact Registry"
+        if: inputs.push-to-gar == true
+        run: docker pull ${{ inputs.container-image }} && docker tag ${{ inputs.container-image }} ${{ inputs.gar-target-image }} && docker push ${{ inputs.gar-target-image }}
+        
+      - id: 'deploy'
+        name: 'Deploy the image to Google Cloud Run'
+        uses: 'google-github-actions/deploy-cloudrun@v1'
+        with:
+          service: ${{ inputs.cloudrun-service }}
+          image: ${{ inputs.push-to-gar == true && inputs.gar-target-image || inputs.container-image }}
+          region: ${{ inputs.region }}
+          flags: ${{ inputs.flags }}
+
+    deployment-done:
+      needs: [ deploy-container ]
+      runs-on: ubuntu-latest
+      steps:
+      - id: msg
+        name: " 🌩️  - Finishing Deployment to Google Cloud Run"
+        run : |
+          echo " 🌩️  - Finishing Deployment to Google Cloud Run"

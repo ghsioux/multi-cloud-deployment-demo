@@ -1,0 +1,105 @@
+on:
+  workflow_call:
+    inputs:
+      ecs-cluster:
+        required: true
+        description: 'The name of the ECS cluster that will host the container app'
+        type: string
+      ecs-service:
+        required: true
+        description: 'The name of the ECS service that will run the container app'
+        type: string
+      ecs-task-definition:
+        required: true
+        description: 'The path to the ECS task definition that will define the container app'
+        type: string
+      container-name:
+        required: true
+        description: 'The name of the container inside the task definition'
+        type: string
+      container-image:
+        required: true
+        description: 'The image to deploy'
+        type: string              
+      aws-region:
+        required: true
+        description: 'The AWS region to deploy to'
+        type: string
+      environment:
+        required: true
+        description: 'The GitHub environment to deploy to'
+        type: string
+    secrets:
+      oidc-role-to-assume:
+        description: 'The ARN of the role to assume during the OIDC authentication'
+        required: true
+
+name: Deploy to AWS Elastic Container Service
+
+jobs:
+
+    init-deployment:
+      runs-on: ubuntu-latest
+      steps:
+      - id: msg
+        name: " 👋  - Starting Deployment to AWS Elastic Container Service"
+        run : |
+          echo -e " 👋  - Starting Deployment to AWS Elastic Container Service"
+          echo -e " \t will deploy ${{ inputs.container-image }} on ECS cluster ${{ inputs.ecs-cluster }}"
+
+    deploy-container:
+      environment:
+        name: ${{ inputs.environment }}
+        url: ${{ steps.deployment_url.outputs.url }}
+      needs: [ init-deployment ]
+      runs-on: ubuntu-latest
+      steps:
+
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.oidc-role-to-assume }}
+          role-session-name: workflowrolesession
+          aws-region: ${{ inputs.aws-region }}
+      
+      - name: Prepare the Amazon ECS task definition to use our container image 
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ inputs.ecs-task-definition }}
+          container-name: ${{ inputs.container-name }}
+          image: ${{ inputs.container-image }}
+
+      - name: Deploy the Amazon ECS task definition (i.e. deploy the container app)
+        id: deploy_task
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ inputs.ecs-service }}
+          cluster: ${{ inputs.ecs-cluster }}
+          wait-for-service-stability: true
+
+      - name: Retrieve ECS task public IP and port (this is a little hacky)
+        id: deployment_url
+        run: |
+          TASK_ARN=$(aws ecs list-tasks --cluster ${{ inputs.ecs-cluster }} --service-name ${{ inputs.ecs-service }} --desired-status RUNNING --query 'taskArns[0]' --output text)
+          while [ $(aws ecs list-tasks --cluster ghsioux-ecs --desired-status RUNNING --service-name calc-service-prod --query 'taskArns[0]' --output text) == "None" ]; do
+            TASK_ARN=$(aws ecs list-tasks --cluster ${{ inputs.ecs-cluster }} --service-name ${{ inputs.ecs-service }} --desired-status RUNNING --query 'taskArns[0]' --output text)
+          done
+          TASK_NETIF_ID=$(aws ecs describe-tasks --cluster ${{ inputs.ecs-cluster }} --task $TASK_ARN --query 'tasks[0].attachments[].details[?name==`networkInterfaceId`].value' --output text)
+          TASK_PUBLIC_IP=$(aws ec2 describe-network-interfaces --network-interface-ids $TASK_NETIF_ID --query 'NetworkInterfaces[0].Association.PublicIp' --output text)
+          TASK_PUBLIC_PORT=$(aws ecs describe-task-definition --task-definition ${{ steps.deploy_task.outputs.task-definition-arn }} --query 'taskDefinition.containerDefinitions[0].portMappings[0].hostPort' --output text)
+          DEPLOYMENT_URL=$(echo http://${TASK_PUBLIC_IP}:${TASK_PUBLIC_PORT})
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+
+    deployment-done:
+      needs: [ deploy-container ]
+      runs-on: ubuntu-latest
+      steps:
+      - id: msg
+        name: " 🌩️  - Finishing Deployment to AWS Elastic Container Service"
+        run : |
+          echo " 🌩️  - Finishing Deployment to AWS Elastic Container Service"
