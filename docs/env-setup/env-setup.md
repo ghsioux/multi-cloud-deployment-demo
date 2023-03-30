@@ -24,7 +24,7 @@ For GCP:
 | --- | --- | 
 | `GCP_PROJECT_ID` | The project ID of the GCP project we'll create. |
 | `GCP_REGION` | The GCP region where we'll deploy the container app. |
-| `GCP_ARTIFACT_REGISTRY` | The name of the Google Artifact Registry (GAR) that we'll create. <br/>(We're [pushing the container image to GHCR](https://github.com/ghsioux/multi-cloud-deployment-demo/blob/main/.github/workflows/multi-cloud-deployment.yml#L100-L111) during in our main workflow, but Cloud Run [does not support GHCR](https://cloud.google.com/run/docs/deploying#images) so we have also to [push it to our GAR registry](https://github.com/ghsioux/multi-cloud-deployment-demo/blob/update-doc/.github/workflows/deploy-to-gcp-cloudrun.yml#L79-L83)). |
+| `GCP_ARTIFACT_REGISTRY` | The name of the Google Artifact Registry (GAR) that we'll create. <br/>(We're [pushing the container image to GHCR](https://github.com/ghsioux/multi-cloud-deployment-demo/blob/main/.github/workflows/multi-cloud-deployment.yml#L100-L111) during in our main workflow, but Cloud Run [does not support GHCR](https://cloud.google.com/run/docs/deploying#images) so we have also to [push it to our GAR registry](https://github.com/ghsioux/multi-cloud-deployment-demo/blob/main/.github/workflows/deploy-to-gcp-cloudrun.yml#L79-L83)). |
 | `GCP_SERVICE_ACCOUNT` | The name of the GCP service account that we'll create and use to authenticate using OIDC. |
 | `GCP_WORKLOAD_IDENTITY_POOL` | The name of the GCP workload identity pool that we'll create. |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | The name of the GCP workload identity provider that we'll create. |
