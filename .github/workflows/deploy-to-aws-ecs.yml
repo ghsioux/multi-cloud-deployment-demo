@@ -3,27 +3,35 @@ on:
     inputs:
       ecs-cluster:
         required: true
+        description: 'The name of the ECS cluster that will host the container app'
         type: string
       ecs-service:
         required: true
+        description: 'The name of the ECS service that will run the container app'
         type: string
       ecs-task-definition:
         required: true
+        description: 'The path to the ECS task definition that will define the container app'
         type: string
       container-name:
         required: true
+        description: 'The name of the container inside the task definition'
         type: string
       container-image:
         required: true
+        description: 'The image to deploy'
         type: string              
       aws-region:
         required: true
+        description: 'The AWS region to deploy to'
         type: string
       environment:
         required: true
+        description: 'The GitHub environment to deploy to'
         type: string
     secrets:
       oidc-role-to-assume:
+        description: 'The ARN of the role to assume during the OIDC authentication'
         required: true
 
 name: Deploy to AWS Elastic Container Service
@@ -34,9 +42,9 @@ jobs:
       runs-on: ubuntu-latest
       steps:
       - id: msg
-        name: " 👋  - Starting Deployment to AWS Elastic Container Servicee"
+        name: " 👋  - Starting Deployment to AWS Elastic Container Service"
         run : |
-          echo -e " 👋  - Starting Deployment to Azure Container Instance"
+          echo -e " 👋  - Starting Deployment to AWS Elastic Container Service"
           echo -e " \t will deploy ${{ inputs.container-image }} on ECS cluster ${{ inputs.ecs-cluster }}"
 
     deploy-container:
@@ -46,18 +54,18 @@ jobs:
       needs: [ init-deployment ]
       runs-on: ubuntu-latest
       steps:
-      # checkout the repo
+
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials (using OIDC)
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.oidc-role-to-assume }}
           role-session-name: workflowrolesession
           aws-region: ${{ inputs.aws-region }}
       
-      - name: Fill in the new image ID in the Amazon ECS task definition
+      - name: Prepare the Amazon ECS task definition to use our container image 
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
@@ -65,7 +73,7 @@ jobs:
           container-name: ${{ inputs.container-name }}
           image: ${{ inputs.container-image }}
 
-      - name: Deploy Amazon ECS task definition
+      - name: Deploy the Amazon ECS task definition (i.e. deploy the container app)
         id: deploy_task
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
@@ -74,7 +82,7 @@ jobs:
           cluster: ${{ inputs.ecs-cluster }}
           wait-for-service-stability: true
 
-      - name: Retrieve ECS task public IP and port
+      - name: Retrieve ECS task public IP and port (this is a little hacky)
         id: deployment_url
         run: |
           TASK_ARN=$(aws ecs list-tasks --cluster ${{ inputs.ecs-cluster }} --service-name ${{ inputs.ecs-service }} --desired-status RUNNING --query 'taskArns[0]' --output text)
