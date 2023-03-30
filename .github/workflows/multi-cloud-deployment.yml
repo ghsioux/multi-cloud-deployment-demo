@@ -1,5 +1,5 @@
 
-name: "🚀 Multi-cloud deployment"
+name: "🚀 Multi-cloud deployment demo"
 
 on:
   workflow_dispatch:
@@ -9,9 +9,9 @@ on:
 jobs:
 
   # This job is about checking that the workflow has been triggered by a repo admin on a release tag (v*)
-  # If not, the workflow will fail.
+  # If not, the workflow will fail with an error message.
   prereq_checks:
-    name: Ensure this workflow has been trigger on a protected release tag (v*)
+    name: Ensure this workflow has been triggered by and admin on a protected release tag (v*)
     runs-on: ubuntu-latest
     env:
       TRIGGERING_ACTOR: ${{ github.triggering_actor }}
@@ -21,9 +21,10 @@ jobs:
           if [[ "$GITHUB_REF" != refs/tags/v* ]]; then
             echo "Only 'v*' tags and associated releases can be deployed, exiting."
             exit 1
+          else
+            echo "The workflow has been triggered on a release tag, continuing."
           fi
-      - name: Ensure the triggering actor has admin permissions on the repository
-        id: check_admin
+      - name: Fail if the workflow has been triggered by a non-admin user
         uses: actions/github-script@v6
         with:
           script: |
@@ -34,15 +35,15 @@ jobs:
               username: TRIGGERING_ACTOR
               }).then(response => {
                 if (response.data.permission == 'admin') {
-                  core.info('The github actor has admin permission on this repository')
+                  core.info('The github actor has admin permission on this repository. Continuing.')
                 } else {
-                  core.info('The github actor does not have admin permission on this repository')
+                  core.info('Only repository admins can trigger this workflow. Exiting.')
                   process.exit(1)
                 }
               })
           
   # This job is about building and testing the application.
-  # The resulting JAR file is then saved as an artifact for the next job.
+  # The resulting JAR file is then saved as a GitHub artifact for the next job.
   build:
     permissions:
       contents: read
@@ -75,7 +76,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    name: "🐳 - Push container image to GitHub Packages"
+    name: "🐳 - Push container image to GitHub Container Registry (GHCR)"
     needs: [ build ]
     runs-on: ubuntu-latest
 
@@ -118,7 +119,7 @@ jobs:
       id-token: write
       contents: read
     name: Azure ACI production deployment
-    uses: ./.github/workflows/reusable_workflows/deploy-to-azure-aci.yml
+    uses: ./.github/workflows/deploy-to-azure-aci.yml
     needs: [ build_publish_container ]
     with:
       environment: azure
@@ -139,7 +140,7 @@ jobs:
       id-token: write
       contents: read
     name: AWS ECS production deployment
-    uses: ./.github/workflows/reusable_workflows/deploy-to-aws-ecs.yml
+    uses: ./.github/workflows/deploy-to-aws-ecs.yml
     needs: [ build_publish_container ]
     with:
       environment: aws
@@ -160,14 +161,14 @@ jobs:
       id-token: write
       contents: read
     name: GCP Cloud Run deployment
-    uses: ./.github/workflows/reusable_workflows/deploy-to-gcp-cloudrun.yml
+    uses: ./.github/workflows/deploy-to-gcp-cloudrun.yml
     needs: [ build_publish_container ]
     with:
       environment: gcp
       container-image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
       cloudrun-service: spring-petclinic  # must match the Cloud Run service mentioned in ../../docs/oidc-setup/gcp.md
       push-to-gar: true
-      gar-target-image: europe-west1-docker.pkg.dev/github-380013/spring-petclinic/${{ github.repository }}:${{ github.ref_name }}  # must match the used GCP region and created Artifact registry in  ../../docs/infra-setup/gcp.md
+      gar-target-image: europe-west1-docker.pkg.dev/ghsioux-123456789/spring-petclinic-gar/${{ github.repository }}:${{ github.ref_name }}  # must match the used GCP region and created Artifact registry in  ../../docs/infra-setup/gcp.md
       region: europe-west1  # must match the GCP region used in ../../docs/infra-setup/gcp.md
       flags: --port=8080 --platform=managed --allow-unauthenticated
     secrets:
