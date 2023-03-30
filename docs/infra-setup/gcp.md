@@ -24,7 +24,7 @@ $ gcloud config set project $GCP_PROJECT_ID
 
 ## Set a billing account for the project
 
-This is a manual step that you need to do in the GCP console. You can find more information [here](https://cloud.google.com/billing/docs/how-to/modify-project).
+If you create a new GCP project, this is a required step that you need to do in the GCP console. You can find more information [here](https://cloud.google.com/billing/docs/how-to/modify-project).
 
 ## Enable the required services
 
@@ -40,7 +40,7 @@ $ gcloud services enable artifactregistry.googleapis.com
 
 ## Create a GCP Artifact Registry
 
-Since Cloud Run does not support GHCR, we need to create a GCP Artifact Registry to store our Docker images:
+Since [Cloud Run does not support GHCR](https://cloud.google.com/run/docs/deploying#images), we need to create a GCP Artifact Registry to store our container images:
 
 ```bash
 gcloud artifacts repositories create $GCP_ARTIFACT_REGISTRY \
