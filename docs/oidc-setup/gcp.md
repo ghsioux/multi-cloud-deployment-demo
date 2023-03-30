@@ -14,7 +14,7 @@ Login to GCP using the following command:
 $ gcloud auth login --brief
 ```
 
-Use the project we've created during the [infra setup](../infra-setup/gcp.md)]:
+Use the project we've created during the [infra setup](../infra-setup/gcp.md):
 
 ```bash
 $ gcloud config set project $GCP_PROJECT_ID
