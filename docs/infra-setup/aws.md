@@ -26,7 +26,7 @@ $ aws ecs create-cluster --cluster-name $AWS_ECS_CLUSTER_NAME --region $AWS_REGI
  
 This step is required for the [amazon-ecs-render-task-definition action](https://github.com/marketplace/actions/amazon-ecs-render-task-definition-action-for-github-actions) (see step 3 of [this documentation](https://docs.github.com/en/actions/deployment/deploying-to-your-cloud-provider/deploying-to-amazon-elastic-container-service)), which is itself a prerequisite for running the [amazon-ecs-deploy-task-definition](https://github.com/aws-actions/amazon-ecs-deploy-task-definition).
 
-The `petclinic-task-definition.json` is included in this repository as it will be later used by the [`amazon-ecs-render-task-definition action` step](../../.github/workflows/deploy-to-aws-ecs.yml#L68-L74). It's a simple task definition that defines a single container, which is the one we'll be deploying in the next step (so we have to remember its name).
+The `petclinic-task-definition.json` is included in this repository as it will be later used by the [`amazon-ecs-render-task-definition action` step](../../.github/workflows/deploy-to-aws-ecs.yml#L68-L74). It's a simple task definition that defines a single container listening on port 8080.
 
 ```bash
 $ aws ecs register-task-definition --cli-input-json file://assets/aws-petclinic-ecs-task-definition.json
@@ -34,19 +34,19 @@ $ aws ecs register-task-definition --cli-input-json file://assets/aws-petclinic-
 
 ## Create the ECS service
 
-We have created an ECS cluster and a task definition which will be used by the ECS service. We now have to create the service itself, but to do so we need to either create or use already existing VPC, subnet(s) and network security group(s).
+We have created an ECS cluster and a task definition which will be used by the ECS service. We now have to create the ECS service itself, but to do so we need to either create or use already existing VPC, subnet(s) and network security group(s).
 
-For this guide I'll use the already existing VPC and associated subnets, and create a dedicated network security group.
+For this guide I'll use the already existing default VPC and associated subnets, and create a dedicated network security group.
 
 ```bash
-# retrieve the VPC id for the VPC you want to use (in this case I'm using the default VPC):
+# retrieve the VPC id for the VPC you want to use 
+# (in this case I'm using the default VPC):
 $ aws ec2 describe-vpcs --region ap-southeast-1
 [...]
             "VpcId": "vpc-02a9574a67eb6f5cd",
 [...]
 
 # retrieve the subnets that belongs to the chosen VPC:
-# (using the VpcId value from the previous command)
 $ aws ec2 describe-subnets --region ap-southeast-1 \
     --query 'Subnets[?VpcId==`vpc-02a9574a67eb6f5cd`].SubnetId'
 [
@@ -73,7 +73,7 @@ $ aws ec2 authorize-security-group-ingress \
 # we can now create the ECS service
 #
 # the task-definition parameter is the name of the task definition
-# we created in the previous step (see "name" in ../assets/petclinic-task-definition.json)
+# we created in the previous step (see "name" in /assets/petclinic-task-definition.json)
 #
 # the network-configuration parameter is a JSON string that specifies the
 # subnets and security groups we retrieved/created previously; we also specify
