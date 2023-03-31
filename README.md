@@ -58,8 +58,8 @@ You should have a look at [how the three reusable workflows are called](.github/
 ## How to trigger
 
 As a repository admin, you can trigger the ["🚀 Multi-cloud deployment demo" workflow](.github/workflows/multi-cloud-deployment.yml):
-* by creating a release with a tag matching the `v*` pattern;
-* manually on a tag matching the `v*` pattern.
+* by [creating a release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release) with a tag matching the `v*` pattern;
+* [manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow) on a tag matching the `v*` pattern.
 
 ## After the first successful deployment 
 
