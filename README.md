@@ -1,6 +1,6 @@
 # Multi-cloud deployment demo repository 🚀
 
-This is the demo repository associated with the blog post "" .
+This is the demo repository associated with the blog post ["Multi-clouds deployment with OIDC and rollback support"](https://ghsioux.github.io/2023/04/05/multi-clouds-deployment) .
 
 Create your own repository from this one by clicking the `Use this template` button on the top right of this page, and follow the quickstart below.
 
